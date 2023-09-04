@@ -26,4 +26,6 @@ public interface IFileManagerService {
     String deleteFile(Long id) throws IOException;
 
     String updateFile(Long id, MultipartFile multipartFile, String uploadPathAsString) throws IOException;
+
+    byte[] getFileByteArray(Long id) throws IOException;
 }

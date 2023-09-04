@@ -53,6 +53,7 @@ public class FileManagerService implements IFileManagerService {
         return message;
     }
 
+    @Override
     public boolean checkFileExtension(MultipartFile file) {
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
@@ -107,16 +108,13 @@ public class FileManagerService implements IFileManagerService {
 
     @Override
     public byte[] convertFileToByteArray(File file) throws IOException {
-        FileInputStream fileInputStream = null;
         byte[] bytesArray = null;
 
         try {
-            fileInputStream = new FileInputStream(file);
-            bytesArray = new byte[(int) file.length()];
-        } finally {
-            if (fileInputStream != null) {
-                fileInputStream.close();
-            }
+            bytesArray = Files.readAllBytes(Paths.get(file.getPath()));
+            System.out.println();
+        }catch(Exception e) {
+            throw new RuntimeException(e);
         }
         return bytesArray;
     }
@@ -159,5 +157,15 @@ public class FileManagerService implements IFileManagerService {
             return "There is no file for update!";
         }
     }
+
+    @Override
+    public byte[] getFileByteArray(Long id) throws IOException{
+
+        FileInformationEntity fileInformation = fileRepository.findById(id).get();
+        File file = new File(fileInformation.getFilePath() + "/" + fileInformation.getFileName());
+        byte[] byteArray = convertFileToByteArray(file);
+        return byteArray;
+    }
+
 
 }
