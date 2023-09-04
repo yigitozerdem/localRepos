@@ -4,11 +4,9 @@ import com.integration.fileManagement.entities.FileInformationEntity;
 import com.integration.fileManagement.services.IFileManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -62,6 +60,26 @@ public class FileManagerController {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/deleteFile")
+    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName) {
+        fileUploadDirectoryAsString = userDirectory + File.separator + fileUploadFolderAsString;
+        String filePath = fileUploadDirectoryAsString + File.separator + fileName;
+        File fileToDelete = new File(filePath);
+        File parentDirectory = fileToDelete.getParentFile();
+        if (!parentDirectory.exists()) {
+            return ResponseEntity.badRequest().body("Parent directory not found.");
+        }
+        if (fileToDelete.exists()) {
+            if (fileToDelete.delete()) {
+                return ResponseEntity.ok("File deleted successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete the file!");
+            }
+        } else {
+            return ResponseEntity.badRequest().body("File not found, check your file is exist!");
         }
     }
 }
