@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,6 +69,7 @@ public class FileManagerService implements IFileManagerService {
                                 originalFilename.toLowerCase().endsWith(".png")));
     }
 
+    @Override
     public boolean checkFilePathIsExist(String fileName, String uploadPathAsString){
         File filePath = new File(uploadPathAsString + File.separator + fileName);
         if(filePath.exists()){
@@ -105,4 +104,30 @@ public class FileManagerService implements IFileManagerService {
     public List<FileInformationEntity> getListOfFileInformation() {
         return fileRepository.findAll();
     }
+
+    @Override
+    public byte[] convertFileToByteArray(File file) throws IOException {
+        FileInputStream fileInputStream = null;
+        byte[] bytesArray = null;
+
+        try {
+            fileInputStream = new FileInputStream(file);
+            bytesArray = new byte[(int) file.length()];
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
+        }
+        return bytesArray;
+    }
+
+    @Override
+    public File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
+        File file = new File(multipartFile.getOriginalFilename());
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(multipartFile.getBytes());
+        }
+        return file;
+    }
+
 }

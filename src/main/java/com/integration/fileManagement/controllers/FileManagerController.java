@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -88,6 +89,32 @@ public class FileManagerController {
     public ResponseEntity<List<FileInformationEntity>> listOfFiles(){
         List<FileInformationEntity> files = fileManagerService.getListOfFileInformation(); // Assuming findAll() retrieves all files
         return ResponseEntity.ok(files);
+    }
+
+    @PostMapping("/getFileContextWithByteArray")
+    public ResponseEntity<byte[]> convertFileToByteArray(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.getSize() > MAX_FILE_SIZE) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File size exceeds the maximum allowed size.".getBytes());
+            } else {
+                if(fileManagerService.checkFileExtension(file)){
+                    fileUploadDirectoryAsString = userDirectory + File.separator + fileUploadFolderAsString;
+                    if(fileManagerService.checkFilePathIsExist(file.getOriginalFilename(),fileUploadDirectoryAsString)){
+                        File tempFile = fileManagerService.convertMultipartFileToFile(file);
+                        byte[] byteArray = Files.readAllBytes(tempFile.toPath());
+                        //String responseString = new String(byteArray, StandardCharsets.UTF_8);
+                        return ResponseEntity.ok(byteArray);
+                    }else{
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Firstly,you have to upload your file.".getBytes());
+                    }
+
+                }else{
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File Extension does not supported!".getBytes());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
