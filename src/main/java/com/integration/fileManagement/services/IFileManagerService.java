@@ -22,4 +22,8 @@ public interface IFileManagerService {
     boolean checkFilePathIsExist(String fileName, String uploadPathAsString);
 
     File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException;
+
+    String deleteFile(Long id) throws IOException;
+
+    String updateFile(Long id, MultipartFile multipartFile, String uploadPathAsString) throws IOException;
 }

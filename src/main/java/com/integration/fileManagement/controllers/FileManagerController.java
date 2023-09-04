@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -66,7 +67,8 @@ public class FileManagerController {
     }
 
     @DeleteMapping("/deleteFile")
-    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName) {
+    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName,
+                                             @RequestParam("fileId") Long fileId) throws IOException {
         fileUploadDirectoryAsString = userDirectory + File.separator + fileUploadFolderAsString;
         String filePath = fileUploadDirectoryAsString + File.separator + fileName;
         File fileToDelete = new File(filePath);
@@ -76,6 +78,7 @@ public class FileManagerController {
         }
         if (fileToDelete.exists()) {
             if (fileToDelete.delete()) {
+                fileManagerService.deleteFile(fileId);
                 return ResponseEntity.ok("File deleted successfully!");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete the file!");
@@ -114,6 +117,28 @@ public class FileManagerController {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/updateFile/{fileId}")
+    public ResponseEntity<String> updateFile(@PathVariable("fileId") Long fileId,
+                                              @RequestParam("file") MultipartFile file) {
+        if (!file.isEmpty()) {
+            try {
+                fileUploadDirectoryAsString = userDirectory + File.separator + fileUploadFolderAsString;
+                File existingFile = new File(fileUploadDirectoryAsString);
+                if (existingFile.exists()) {
+                        String response = fileManagerService.updateFile(fileId,file,fileUploadDirectoryAsString);
+                    return ResponseEntity.ok(response);
+                } else {
+                    return ResponseEntity.badRequest().body("File not found.");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update the file.");
+            }
+        } else {
+            return ResponseEntity.badRequest().body("No file provided for update.");
         }
     }
 }

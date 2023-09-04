@@ -130,4 +130,34 @@ public class FileManagerService implements IFileManagerService {
         return file;
     }
 
+    @Override
+    public String deleteFile(Long id) throws IOException {
+        fileRepository.deleteById(id);
+        return "SUCCES";
+    }
+
+    @Override
+    public String updateFile(Long id, MultipartFile multipartFile, String uploadPathAsString) throws IOException {
+        FileInformationEntity fileInformation = fileRepository.findById(id).get();
+
+        if (!multipartFile.isEmpty())
+        {
+            File fileToDelete = new File(fileInformation.getFilePath()+"/"+fileInformation.getFileName());
+            if(fileToDelete.delete()){
+                fileRepository.deleteById(id);
+                saveFile(multipartFile.getOriginalFilename(),multipartFile,uploadPathAsString);
+                fileInformation.setFileName(multipartFile.getOriginalFilename());
+                fileInformation.setFilePath(uploadPathAsString);
+                fileInformation.setFileExtension(multipartFile.getContentType());
+                fileInformation.setFileSize(String.valueOf(multipartFile.getSize()));
+                fileRepository.save(fileInformation);
+                return "File updated successfully!";
+            }else{
+                return "File cannot delete!";
+            }
+        }else{
+            return "There is no file for update!";
+        }
+    }
+
 }
