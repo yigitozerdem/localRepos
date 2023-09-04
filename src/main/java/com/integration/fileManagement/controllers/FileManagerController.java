@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 
 @RestController
 @RequestMapping(path="/api")
@@ -81,6 +82,12 @@ public class FileManagerController {
         } else {
             return ResponseEntity.badRequest().body("File not found, check your file is exist!");
         }
+    }
+
+    @GetMapping("/listOfFiles")
+    public ResponseEntity<List<FileInformationEntity>> listOfFiles(){
+        List<FileInformationEntity> files = fileManagerService.getListOfFileInformation(); // Assuming findAll() retrieves all files
+        return ResponseEntity.ok(files);
     }
 }
 

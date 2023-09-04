@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,5 +99,10 @@ public class FileManagerService implements IFileManagerService {
             System.out.println("File extension was not found in the string.");
             return fileName;
         }
+    }
+
+    @Override
+    public List<FileInformationEntity> getListOfFileInformation() {
+        return fileRepository.findAll();
     }
 }
