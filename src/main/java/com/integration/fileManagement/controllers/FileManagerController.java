@@ -49,7 +49,7 @@ public class FileManagerController {
                     fileName = fileManagerService.saveFile(file.getOriginalFilename(),file,fileUploadDirectoryAsString);
                     if(!fileName.equals("")){
                         fileInformationEntity.setFileName(fileName);
-                        fileInformationEntity.setFilePath(fileUploadDirectoryAsString);
+                        fileInformationEntity.setFilePath(fileUploadDirectoryAsString + File.separator + fileName);
                         fileInformationEntity.setFileSize(String.valueOf(file.getSize()));
                         fileInformationEntity.setFileExtension(file.getContentType());
                         fileManagerService.insertNewSingleFile(fileInformationEntity);

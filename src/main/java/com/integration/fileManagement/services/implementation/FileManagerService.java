@@ -13,12 +13,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class FileManagerService implements IFileManagerService {
     private final IFileRepository fileRepository;
+    AtomicLong sequence = new AtomicLong(1);
     @Autowired
     public FileManagerService(IFileRepository fileRepository) {
         this.fileRepository = fileRepository;
@@ -26,7 +28,8 @@ public class FileManagerService implements IFileManagerService {
 
     @Override
     public void insertNewSingleFile(FileInformationEntity fileInformationEntity) throws Exception{
-        System.out.println(fileInformationEntity.getFileName());
+        System.out.println(fileInformationEntity.getId());
+        fileInformationEntity.setId(generateSequence());
         fileRepository.save(fileInformationEntity);
     }
 
@@ -144,8 +147,9 @@ public class FileManagerService implements IFileManagerService {
             if(fileToDelete.delete()){
                 fileRepository.deleteById(id);
                 saveFile(multipartFile.getOriginalFilename(),multipartFile,uploadPathAsString);
+                fileInformation.setId(id);
                 fileInformation.setFileName(multipartFile.getOriginalFilename());
-                fileInformation.setFilePath(uploadPathAsString);
+                fileInformation.setFilePath(uploadPathAsString  + File.separator + multipartFile.getOriginalFilename());
                 fileInformation.setFileExtension(multipartFile.getContentType());
                 fileInformation.setFileSize(String.valueOf(multipartFile.getSize()));
                 fileRepository.save(fileInformation);
@@ -165,6 +169,11 @@ public class FileManagerService implements IFileManagerService {
         File file = new File(fileInformation.getFilePath() + "/" + fileInformation.getFileName());
         byte[] byteArray = convertFileToByteArray(file);
         return byteArray;
+    }
+
+
+    public Long generateSequence() {
+        return sequence.getAndIncrement();
     }
 
 
