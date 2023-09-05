@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-8">
+    <label class="btn btn-default p-0">
+      <input type="file" (change)="selectFile($event)" />
+    </label>
+  </div>
+
+  <div class="col-4">
+    <button class="btn btn-success btn-sm" [disabled]="!selectedFiles" (click)="upload()">
+      Upload
+    </button>
+  </div>
+</div>
+
+<div *ngIf="currentFile" class="progress my-3">
+  <div
+    class="progress-bar progress-bar-info"
+    role="progressbar"
+    attr.aria-valuenow="{{ progress }}"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [ngStyle]="{ width: progress + '%' }"
+  >
+    {{ progress }}%
+  </div>
+</div>
+
+<div *ngIf="message" class="alert alert-secondary" role="alert">{{ message }}</div>
+
+<div class="card mt-3">
+  <div class="card-header">List of Files</div>
+  <button class="btn btn-primary mt-2 ml-2" (click)="getListOfFiles()">List Files</button>
+  <div class="table-responsive" *ngIf="listOfFiles && listOfFiles.length > 0">
+    <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover" *ngIf="listOfFiles && listOfFiles.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>File Name</th>
+            <th>File Path</th>
+            <th>File Extension</th>
+            <th>File Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let file of listOfFiles">
+            <td>{{ file.id }}</td>
+            <td>{{ file.fileName }}</td>
+            <td>{{ file.filePath }}</td>
+            <td>{{ file.fileExtension }}</td>
+            <td>{{ file.fileSize }}</td>
+              <td>
+                <button class="btn btn-primary" (click)="updateFile(file.id)">Edit</button>
+                <input type="file" #fileInput hidden (change)="onFileSelectedForUpdate($event)" id="fileInput">
+              </td> 
+              <td>
+                <button class="btn btn-danger" (click)="deleteFile(file.fileName, file.id)">Delete</button>
+            </td>
+            <td>
+              <button class="btn btn-primary" (click)="convertFileToByteArray(file.id)">Byte Array</button>
+          </td>
+          </tr>
+        </tbody>
+      </table>
+    </table>
+  </div>
+  <div class="card-body" *ngIf="!isListButtonClicked">
+    Click the button above to list files.
+  </div>
+  <div class="card-body" *ngIf="isListButtonClicked && (!listOfFiles || listOfFiles.length === 0)">
+    No files to display.
+  </div>
+</div>
+
+<div *ngIf="bytesArray !== null && isByteArrayButtonClicked">
+  <pre>{{ bytesArray}}</pre>
+</div>
+<div *ngIf="bytesArray === null && isByteArrayButtonClicked">
+  <p>No byte array received from the API.</p>
+</div>
+
